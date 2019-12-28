@@ -15,7 +15,7 @@ import (
 	"gopkg.in/cheggaaa/pb.v1"
 
 	"github.com/urfave/cli"
-	"github.com/vcabbage/trivialt"
+	"pack.ag/tftp"
 )
 
 var (
@@ -135,9 +135,9 @@ func cmdServe(c *cli.Context) {
 	}
 
 	log.Printf("Starting TFTP Server on %q, serving %q\n", addr, root)
-	fs := &server{trivialt.FileServer(root)}
+	fs := &server{tftp.FileServer(root)}
 
-	server, err := trivialt.NewServer(addr, trivialt.ServerSinglePort(singlePort))
+	server, err := tftp.NewServer(addr, tftp.ServerSinglePort(singlePort))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -151,15 +151,15 @@ func cmdServe(c *cli.Context) {
 }
 
 type server struct {
-	fs trivialt.ReadWriteHandler
+	fs tftp.ReadWriteHandler
 }
 
-func (s *server) ServeTFTP(r trivialt.ReadRequest) {
+func (s *server) ServeTFTP(r tftp.ReadRequest) {
 	log.Printf("Read Request from %s for %q", r.Addr(), r.Name())
 	s.fs.ServeTFTP(r)
 }
 
-func (s *server) ReceiveTFTP(r trivialt.WriteRequest) {
+func (s *server) ReceiveTFTP(r tftp.WriteRequest) {
 	log.Printf("Write Request from %s for %q", r.Addr(), r.Name())
 	s.fs.ReceiveTFTP(r)
 }
@@ -176,7 +176,7 @@ func cmdGet(c *cli.Context) {
 	client := newClient(c)
 	resp, err := client.Get(server + "/" + filePath)
 	if err != nil {
-		log.Fatalln("\n", trivialt.ErrorCause(err))
+		log.Fatalln("\n", tftp.ErrorCause(err))
 	}
 
 	var out io.Writer
@@ -207,7 +207,7 @@ func cmdGet(c *cli.Context) {
 	}
 
 	if _, err = io.Copy(out, in); err != nil {
-		log.Fatalln("\n", trivialt.ErrorCause(err))
+		log.Fatalln("\n", tftp.ErrorCause(err))
 	}
 }
 
@@ -250,26 +250,26 @@ func cmdPut(c *cli.Context) {
 
 	url := server + "/" + filename
 	if err = client.Put(url, upload, tsize); err != nil {
-		log.Fatalln("\n", trivialt.ErrorCause(err))
+		log.Fatalln("\n", tftp.ErrorCause(err))
 	}
 }
 
-func newClient(c *cli.Context) *trivialt.Client {
-	mode := trivialt.ModeOctet
+func newClient(c *cli.Context) *tftp.Client {
+	mode := tftp.ModeOctet
 	if c.Bool("netascii") {
-		mode = trivialt.ModeNetASCII
+		mode = tftp.ModeNetASCII
 	}
 
-	opts := []trivialt.ClientOpt{
-		trivialt.ClientBlocksize(c.Int("blksize")),
-		trivialt.ClientTransferSize(c.Bool("tsize")),
-		trivialt.ClientWindowsize(c.Int("windowsize")),
-		trivialt.ClientTimeout(c.Int("timeout")),
-		trivialt.ClientRetransmit(c.Int("retransmit")),
-		trivialt.ClientMode(mode),
+	opts := []tftp.ClientOpt{
+		tftp.ClientBlocksize(c.Int("blksize")),
+		tftp.ClientTransferSize(c.Bool("tsize")),
+		tftp.ClientWindowsize(c.Int("windowsize")),
+		tftp.ClientTimeout(c.Int("timeout")),
+		tftp.ClientRetransmit(c.Int("retransmit")),
+		tftp.ClientMode(mode),
 	}
 
-	client, err := trivialt.NewClient(opts...)
+	client, err := tftp.NewClient(opts...)
 	if err != nil {
 		log.Println()
 		log.Fatalln(err)
