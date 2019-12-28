@@ -1,6 +1,6 @@
 {
 	"comment": "",
-	"ignore": "test github.com/vcabbage/trivialt/",
+	"ignore": "test",
 	"package": [
 		{
 			"checksumSHA1": "ToTZYDqlvtuFsetAq5FeCwUxp0E=",
